@@ -26,6 +26,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+
+            ->brandLogo(asset('images/logo.png'))
+            ->brandLogoHeight('3rem')
+            ->brandName('ClientOne') 
+
             ->login()
             ->brandName('Bem vindo(a)')
             ->colors([
