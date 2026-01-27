@@ -34,29 +34,34 @@ class ClienteResource extends Resource
     {
         return $form
             ->schema([
-                // Estilização CSS para mover o botão 'X' do PDF para a direita
-                // No seu ClienteResource.php, substitua o Placeholder do CSS por este:
-
+                // Estilização CSS unificada para alinhar o 'X' à direita em PDFs e Imagens
                 Placeholder::make('custom_layout_css')
                     ->label('')
                     ->content(new HtmlString('
         <style>
-            /* Alinha o container do item para ocupar toda a largura */
-            .pdf-uploader-custom .filepond--item { 
+            /* Container geral para ambos os tipos de upload */
+            .custom-uploader .filepond--item { 
                 width: 100%; 
             }
 
-            /* Move o botão de fechar (X) para a direita */
-            .pdf-uploader-custom .filepond--file-action-button.filepond--action-remove-item {
+            /* Move o botão de fechar (X) para a direita em arquivos e imagens */
+            .custom-uploader .filepond--file-action-button.filepond--action-remove-item {
                 right: 10px !important;
                 left: auto !important;
+                top: 10px !important;
+                z-index: 10;
             }
 
-            /* Garante que o container de informações (nome e tamanho) use o espaço da esquerda */
-            .pdf-uploader-custom .filepond--file-info {
+            /* Ajuste específico para o preview da imagem para não cobrir o X */
+            .custom-uploader .filepond--image-preview-wrapper {
+                z-index: 1;
+            }
+
+            /* Garante que as informações do PDF fiquem alinhadas à esquerda */
+            .custom-uploader .filepond--file-info {
                 transform: none !important;
                 margin-left: 10px !important;
-                margin-right: 50px !important; /* Abre espaço para o botão X na direita */
+                margin-right: 50px !important;
                 display: flex;
                 flex-direction: column;
                 align-items: flex-start;
@@ -64,14 +69,13 @@ class ClienteResource extends Resource
                 visibility: visible !important;
             }
 
-            /* Força a exibição do nome do arquivo */
-            .pdf-uploader-custom .filepond--file-info-main {
+            /* Estilo do nome do arquivo no PDF */
+            .custom-uploader .filepond--file-info-main {
                 color: white !important;
                 font-weight: bold;
             }
             
-            /* Ajusta a posição do botão de download/abrir para não encavalar */
-            .pdf-uploader-custom .filepond--file-action-button {
+            .custom-uploader .filepond--file-action-button {
                 cursor: pointer;
             }
         </style>
@@ -224,7 +228,7 @@ class ClienteResource extends Resource
                     ->schema([
                         FileUpload::make('documento_path')
                             ->label('Documentos PDF/Doc (Múltiplos)')
-                            ->multiple() // Habilita múltiplos
+                            ->multiple()
                             ->reorderable()
                             ->appendFiles()
                             ->disk('public')
@@ -232,18 +236,19 @@ class ClienteResource extends Resource
                             ->openable()
                             ->downloadable()
                             ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                            ->extraAttributes(['class' => 'pdf-uploader-custom']), // Classe para o CSS acima
+                            ->extraAttributes(['class' => 'custom-uploader']), // Classe unificada
 
                         FileUpload::make('foto_path')
                             ->label('Fotos (Múltiplas)')
                             ->image()
-                            ->multiple() // Habilita múltiplas
+                            ->multiple()
                             ->reorderable()
                             ->appendFiles()
                             ->disk('public')
                             ->directory('clientes/fotos')
                             ->imageEditor()
-                            ->openable(),
+                            ->openable()
+                            ->extraAttributes(['class' => 'custom-uploader']), // Classe unificada aplicada aqui também
                     ])->columns(1)
             ]);
     }
