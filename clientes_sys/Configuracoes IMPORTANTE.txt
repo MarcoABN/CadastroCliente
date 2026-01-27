@@ -1,0 +1,6 @@
+Dominio gerado gratis em https://www.noip.com/
+
+https://clienteone.ddns.net/
+
+
+Desenvolvido em Laravel 12
