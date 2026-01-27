@@ -35,7 +35,48 @@ class ClienteResource extends Resource
         return $form
             ->schema([
                 // Estilização CSS para mover o botão 'X' do PDF para a direita
-                
+                // No seu ClienteResource.php, substitua o Placeholder do CSS por este:
+
+                Placeholder::make('custom_layout_css')
+                    ->label('')
+                    ->content(new HtmlString('
+        <style>
+            /* Alinha o container do item para ocupar toda a largura */
+            .pdf-uploader-custom .filepond--item { 
+                width: 100%; 
+            }
+
+            /* Move o botão de fechar (X) para a direita */
+            .pdf-uploader-custom .filepond--file-action-button.filepond--action-remove-item {
+                right: 10px !important;
+                left: auto !important;
+            }
+
+            /* Garante que o container de informações (nome e tamanho) use o espaço da esquerda */
+            .pdf-uploader-custom .filepond--file-info {
+                transform: none !important;
+                margin-left: 10px !important;
+                margin-right: 50px !important; /* Abre espaço para o botão X na direita */
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+
+            /* Força a exibição do nome do arquivo */
+            .pdf-uploader-custom .filepond--file-info-main {
+                color: white !important;
+                font-weight: bold;
+            }
+            
+            /* Ajusta a posição do botão de download/abrir para não encavalar */
+            .pdf-uploader-custom .filepond--file-action-button {
+                cursor: pointer;
+            }
+        </style>
+    '))
+                    ->columnSpanFull(),
 
                 // --- SEÇÃO DADOS PESSOAIS ---
                 Section::make('Dados Pessoais')
@@ -43,12 +84,12 @@ class ClienteResource extends Resource
                         TextInput::make('nome')
                             ->required()
                             ->label('Nome Completo'),
-                        
+
                         TextInput::make('cpf')
                             ->mask('999.999.999-99')
                             ->required()
                             ->label('CPF'),
-                        
+
                         DatePicker::make('data_nascimento')
                             ->label('Data de Nascimento')
                             ->format('d/m/Y')
@@ -63,16 +104,16 @@ class ClienteResource extends Resource
                         TextInput::make('idade')
                             ->numeric()
                             ->readOnly(),
-                            
+
                         TextInput::make('nome_pai')
                             ->label('Nome do Pai'),
-                            
+
                         TextInput::make('nome_mae')
                             ->label('Nome da Mãe'),
-                            
+
                         TextInput::make('telefone')
                             ->mask('(99) 9 9999-9999'),
-                            
+
                         TextInput::make('email')
                             ->email(),
                     ])->columns(2),
@@ -81,10 +122,10 @@ class ClienteResource extends Resource
                 Section::make('Endereço')
                     ->schema([
                         TextInput::make('cep')
-                        ->label('CEP')
-                        ->mask('99999-999')
-                        ->live(onBlur: true)
-                        ->helperText(new HtmlString('
+                            ->label('CEP')
+                            ->mask('99999-999')
+                            ->live(onBlur: true)
+                            ->helperText(new HtmlString('
                             <div wire:loading wire:target="data.cep" class="text-primary-500 text-sm font-bold flex items-center gap-2 mt-1">
                                 <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -93,30 +134,31 @@ class ClienteResource extends Resource
                                 Buscando endereço...
                             </div>
                         '))
-                        ->afterStateUpdated(function ($state, Set $set) {
-                            if (!$state) return;
-                            $response = Http::get("https://viacep.com.br/ws/{$state}/json/")->json();
-                            if (!isset($response['erro'])) {
-                                $set('endereco', $response['logradouro'] ?? '');
-                                $set('bairro', $response['bairro'] ?? '');
-                                $set('cidade', ($response['localidade'] ?? '') . '/' . ($response['uf'] ?? ''));
-                            }
-                        }),
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if (!$state)
+                                    return;
+                                $response = Http::get("https://viacep.com.br/ws/{$state}/json/")->json();
+                                if (!isset($response['erro'])) {
+                                    $set('endereco', $response['logradouro'] ?? '');
+                                    $set('bairro', $response['bairro'] ?? '');
+                                    $set('cidade', ($response['localidade'] ?? '') . '/' . ($response['uf'] ?? ''));
+                                }
+                            }),
 
                         TextInput::make('endereco')
                             ->label('Rua / Logradouro')
                             ->columnSpan(2),
-                            
+
                         TextInput::make('numero')
                             ->label('Número')
                             ->numeric(),
 
                         TextInput::make('complemento')
                             ->label('Complemento'),
-                            
+
                         TextInput::make('bairro')
                             ->label('Bairro'),
-                            
+
                         TextInput::make('cidade')
                             ->label('Cidade/UF')
                             ->readOnly(),
@@ -131,15 +173,15 @@ class ClienteResource extends Resource
                             ->columnSpanFull(),
 
                         TextInput::make('banco')
-                            ->visible(fn (Get $get) => $get('correntista')),
-                            
+                            ->visible(fn(Get $get) => $get('correntista')),
+
                         TextInput::make('agencia')
                             ->label('Agência')
-                            ->visible(fn (Get $get) => $get('correntista')),
-                            
+                            ->visible(fn(Get $get) => $get('correntista')),
+
                         TextInput::make('conta_corrente')
                             ->label('Conta Corrente')
-                            ->visible(fn (Get $get) => $get('correntista')),
+                            ->visible(fn(Get $get) => $get('correntista')),
                     ])->columns(3),
 
                 // --- SEÇÃO STATUS ---
@@ -150,11 +192,11 @@ class ClienteResource extends Resource
                                 Toggle::make('simulacao')
                                     ->label('Simulação Realizada')
                                     ->inline(false),
-                                    
+
                                 Toggle::make('proposta_enviada')
                                     ->label('Proposta Enviada')
                                     ->inline(false),
-                                    
+
                                 Toggle::make('aprovada')
                                     ->label('Aprovada')
                                     ->inline(false)
@@ -191,7 +233,7 @@ class ClienteResource extends Resource
                             ->downloadable()
                             ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
                             ->extraAttributes(['class' => 'pdf-uploader-custom']), // Classe para o CSS acima
-                            
+
                         FileUpload::make('foto_path')
                             ->label('Fotos (Múltiplas)')
                             ->image()
@@ -213,7 +255,7 @@ class ClienteResource extends Resource
                 Tables\Columns\TextColumn::make('nome')->searchable(),
                 Tables\Columns\TextColumn::make('cpf')
                     ->searchable()
-                    ->formatStateUsing(fn ($state) => $state ? substr($state, 0, 4) . 'xxx.xxx-' . substr($state, -2) : null),
+                    ->formatStateUsing(fn($state) => $state ? substr($state, 0, 4) . 'xxx.xxx-' . substr($state, -2) : null),
                 Tables\Columns\TextColumn::make('cidade'),
             ])
             ->filters([
@@ -227,7 +269,10 @@ class ClienteResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array { return []; }
+    public static function getRelations(): array
+    {
+        return [];
+    }
 
     public static function getPages(): array
     {
