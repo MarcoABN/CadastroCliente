@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Providers;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login;
+use Carbon\Carbon;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -19,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Event::listen(Login::class, function ($event) {
+            $event->user->update([
+                'last_login_at' => Carbon::now(),
+            ]);
+        });
     }
 }

@@ -227,8 +227,9 @@ class ClienteResource extends Resource
                 Section::make('Arquivos')
                     ->schema([
                         FileUpload::make('documento_path')
-                            ->label('Documentos PDF/Doc (Múltiplos)')
+                            ->label('Documentos PDF/Doc (Max. 3 arquivos)')
                             ->multiple()
+                            ->maxFiles(3)
                             ->reorderable()
                             ->appendFiles()
                             ->disk('public')
@@ -242,6 +243,7 @@ class ClienteResource extends Resource
                             ->label('Fotos (Múltiplas)')
                             ->image()
                             ->multiple()
+                            ->maxFiles(3)
                             ->reorderable()
                             ->appendFiles()
                             ->disk('public')
