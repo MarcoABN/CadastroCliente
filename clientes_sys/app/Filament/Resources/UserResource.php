@@ -31,7 +31,18 @@ class UserResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Dados do Usuário')
                     ->schema([
-                        // ... campos de nome e email
+                        // Adicione estes dois campos que estavam faltando:
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nome')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('email')
+                            ->label('E-mail')
+                            ->email()
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(255),
 
                         Forms\Components\TextInput::make('password')
                             ->label('Senha')
@@ -40,7 +51,6 @@ class UserResource extends Resource
                             ->dehydrateStateUsing(fn($state) => Hash::make($state))
                             ->dehydrated(fn($state) => filled($state))
                             ->confirmed()
-                            // Regra: Mínimo 8 caracteres, letras (maiúsculas/minúsculas) e números
                             ->rule(Password::min(8)->letters()->mixedCase()->numbers()),
 
                         Forms\Components\TextInput::make('password_confirmation')
