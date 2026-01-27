@@ -110,8 +110,8 @@ class UserResource extends Resource
      * Opcional: Filtra a lista para não mostrar um administrador mestre
      */
     public static function getEloquentQuery(): Builder
-{
-    return parent::getEloquentQuery()
-        ->where('email', '!=', 'marcoanunes23@gmail.com');
-}
+    {
+        return parent::getEloquentQuery()
+            ->where('email', '!=', 'marcoanunes23@gmail.com');
+    }
 }
