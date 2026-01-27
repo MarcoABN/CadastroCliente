@@ -34,28 +34,23 @@ class ClienteResource extends Resource
     {
         return $form
             ->schema([
-                // CSS para manter o botão X isolado na direita nos arquivos em linha
+                // Estilização para manter o "X" na direita e textos legíveis
                 Placeholder::make('custom_layout_css')
                     ->label('')
                     ->content(new HtmlString('
                         <style>
                             .file-uploader-custom .filepond--item { width: 100%; }
-                            
-                            /* Move o X para a extrema direita */
                             .file-uploader-custom .filepond--file-action-button.filepond--action-remove-item {
                                 right: 10px !important;
                                 left: auto !important;
                                 margin-left: auto;
                             }
-
-                            /* Ajusta informações do arquivo para não encavalar no X */
                             .file-uploader-custom .filepond--file-info {
                                 margin-right: 80px !important;
                                 opacity: 1 !important;
                                 visibility: visible !important;
                                 transform: none !important;
                             }
-
                             .file-uploader-custom .filepond--file-info-main {
                                 color: white !important;
                                 font-weight: bold;
@@ -70,12 +65,13 @@ class ClienteResource extends Resource
                         TextInput::make('cpf')->mask('999.999.999-99')->required()->label('CPF'),
                         DatePicker::make('data_nascimento')
                             ->label('Data de Nascimento')
+                            ->displayFormat('d/m/Y')
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn ($state, Set $set) => $state ? $set('idade', Carbon::parse($state)->age) : null),
                         TextInput::make('idade')->numeric()->readOnly(),
                         TextInput::make('nome_pai')->label('Nome do Pai'),
                         TextInput::make('nome_mae')->label('Nome da Mãe'),
-                        TextInput::make('telefone')->mask('(99) 9 9999-9999'),
+                        TextInput::make('telefone')->mask('(62) 9 9999-9999'),
                         TextInput::make('email')->email(),
                     ])->columns(2),
 
@@ -101,44 +97,33 @@ class ClienteResource extends Resource
                         TextInput::make('cidade')->label('Cidade/UF')->readOnly(),
                     ])->columns(3),
 
-                Section::make('Dados Bancários')
+                Section::make('Status e Bancário')
                     ->schema([
-                        Toggle::make('correntista')->label('É Correntista?')->live()->columnSpanFull(),
+                        Toggle::make('correntista')->label('É Correntista?')->live(),
+                        Toggle::make('simulacao')->label('Simulação Realizada'),
+                        Toggle::make('proposta_enviada')->label('Proposta Enviada'),
+                        Toggle::make('aprovada')->label('Aprovada')->onColor('success'),
+                        
                         TextInput::make('banco')->visible(fn (Get $get) => $get('correntista')),
                         TextInput::make('agencia')->label('Agência')->visible(fn (Get $get) => $get('correntista')),
                         TextInput::make('conta_corrente')->label('Conta Corrente')->visible(fn (Get $get) => $get('correntista')),
-                    ])->columns(3),
-
-                Section::make('Status da Proposta')
-                    ->schema([
-                        Fieldset::make('Acompanhamento')
-                            ->schema([
-                                Toggle::make('simulacao')->label('Simulação Realizada'),
-                                Toggle::make('proposta_enviada')->label('Proposta Enviada'),
-                                Toggle::make('aprovada')->label('Aprovada')->onColor('success'),
-                            ])->columns(3)
-                    ]),
-
-                Section::make('Observações')
-                    ->schema([
-                        Textarea::make('comentario_01')->label('Comentário 01')->rows(3)->columnSpanFull(),
-                        Textarea::make('comentario_02')->label('Comentário 02')->rows(3)->columnSpanFull(),
-                    ]),
+                    ])->columns(4),
 
                 Section::make('Arquivos')
                     ->schema([
                         FileUpload::make('documento_path')
                             ->label('Documentos PDF/Doc (Múltiplos)')
-                            ->multiple() 
+                            ->multiple()
                             ->reorderable()
-                            ->appendFiles() // Mantém os que já existem ao subir novos
+                            ->appendFiles()
                             ->disk('public')
-                            ->directory('clientes/documentos')
-                            ->openable() // Abre em nova aba
-                            ->downloadable() // Permite baixar
-                            ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+                            // Removido o diretório para encontrar os arquivos na raiz da pasta public
+                            ->directory('') 
+                            ->visibility('public')
+                            ->openable()
+                            ->downloadable()
                             ->extraAttributes(['class' => 'file-uploader-custom']),
-                            
+
                         FileUpload::make('foto_path')
                             ->label('Fotos (Múltiplas)')
                             ->image()
@@ -146,7 +131,9 @@ class ClienteResource extends Resource
                             ->reorderable()
                             ->appendFiles()
                             ->disk('public')
-                            ->directory('clientes/fotos')
+                            // Removido o diretório para encontrar os arquivos na raiz da pasta public
+                            ->directory('')
+                            ->visibility('public')
                             ->imageEditor()
                             ->openable()
                             ->extraAttributes(['class' => 'file-uploader-custom']),
@@ -162,12 +149,9 @@ class ClienteResource extends Resource
                 Tables\Columns\TextColumn::make('cpf')->searchable(),
                 Tables\Columns\TextColumn::make('cidade'),
             ])
-            ->filters([Tables\Filters\TrashedFilter::make()])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-                Tables\Actions\RestoreAction::make(),
-                Tables\Actions\ForceDeleteAction::make(),
             ]);
     }
 
